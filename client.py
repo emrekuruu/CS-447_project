@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 serverName = "127.0.0.1"
-port = 35000
+port = 30000
 
 #Get a Nick name from the client
 nickName = input("What would you like to be called: ")
@@ -15,10 +15,10 @@ clientSocket.connect((serverName,port))
 def receive():
     while True:
         try:
-            message = clientSocket.recv(1024).decode("ascii")
+            message = clientSocket.recv(1024).decode()
             #if the message is NICK this means server wants us to send it our nickname( this is the initial connection )
             if message == "NICK":
-                clientSocket.send(nickName.encode("ascii"))
+                clientSocket.send(nickName.encode())
             else:
                print(message)
         except:
@@ -30,7 +30,7 @@ def receive():
 def write():
     message = input("")
     messageToBeSent = f"{nickName}: {message}"
-    clientSocket.send(messageToBeSent.encode("ascii"))
+    clientSocket.send(messageToBeSent.encode())
 
 
 #This is the tricky part !!!
@@ -40,3 +40,4 @@ receiveThread.start()
 
 writeThread = threading.Thread(target=write)
 writeThread.start()
+
