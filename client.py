@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 serverName = "127.0.0.1"
-port = 30000
+port = 60001
 
 #Get a Nick name from the client
 nickName = input("What would you like to be called: ")
@@ -28,9 +28,9 @@ def receive():
 
 #This is for writing in the chat
 def write():
-    message = input("")
-    messageToBeSent = f"{nickName}: {message}"
-    clientSocket.send(messageToBeSent.encode())
+    while True:
+        messageToBeSent = f'{nickName}: {input("")}'
+        clientSocket.send(messageToBeSent.encode())
 
 
 #This is the tricky part !!!
@@ -40,4 +40,5 @@ receiveThread.start()
 
 writeThread = threading.Thread(target=write)
 writeThread.start()
+
 
