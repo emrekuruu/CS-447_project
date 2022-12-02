@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 host = "127.0.0.1"
-port = 30000
+port = 60001
 
 serverSocket = socket(AF_INET,SOCK_STREAM )
 serverSocket.bind((host,port))
@@ -27,7 +27,7 @@ def broadcast(message):
 def handle(client):
     while True:
         try:
-          message,clientSocket = client.recv(1024)
+          message = client.recv(1024)
           broadcast(message)
         except:
             index = clients.index(client)
