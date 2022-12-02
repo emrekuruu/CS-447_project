@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 host = "127.0.0.1"
-port = 35000
+port = 30000
 
 serverSocket = socket(AF_INET,SOCK_STREAM )
 serverSocket.bind((host,port))
@@ -20,7 +20,7 @@ nickNames = []
 #for sending a message to each client
 def broadcast(message):
     for client in clients:
-        serverSocket.send(message)
+        client.send(message)
 
 
 #business logic for one client (later this method will run for all clients)
@@ -33,7 +33,7 @@ def handle(client):
             index = clients.index(client)
             clients.remove(client)
             client.close()
-            broadcast(f"{nickNames[index]} has left the chat".encode('ascii'))
+            broadcast(f"{nickNames[index]} has left the chat".encode())
             nickNames.remove(nickNames[index])
             break
 
@@ -42,24 +42,25 @@ def handle(client):
 def receive():
     while True:
         #once a client connects get its address and create a socket for them
-        client,address = serverSocket.accept()
+        clientSocket,address = serverSocket.accept()
         print(f"Connected from {address}")
 
         #ask them for a username than add them to our lists
-        client.send("NICK".encode('ascii'))
-        nickname = client.recv(1024).decode('ascii')
+        clientSocket.send("NICK".encode())
+        nickname = clientSocket.recv(1024).decode()
         nickNames.append(nickname)
-        clients.append(client)
+        clients.append(clientSocket)
         print(f"Nickname of the client is {nickname}")
 
         #tell everyone in the chat someone has connected
-        broadcast(f"{nickname} has entered the chat".encode("ascii"))
+        broadcast(f"{nickname} has entered the chat".encode())
 
         #Tell the client connection is successful
-        client.send("Connection successful Welcome".encode("ascii"))
+        clientSocket.send("Connection successful Welcome".encode())
 
         #We will have a new thread for each client we want to handle each connection separately !!!
-        thread = threading.Thread(target=handle,args=(client,))
+        thread = threading.Thread(target=handle,args=(clientSocket,))
         thread.start()
 
 receive()
+serverSocket.close()
