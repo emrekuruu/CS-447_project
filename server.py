@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 host = "127.0.0.1"
-port = 60001
+port = 22001
 
 serverSocket = socket(AF_INET,SOCK_STREAM )
 serverSocket.bind((host,port))
@@ -15,8 +15,6 @@ clients = []
 #Nickname list
 nickNames = []
 
-
-
 #for sending a message to each client
 def broadcast(message):
     for client in clients:
@@ -28,7 +26,24 @@ def handle(client):
     while True:
         try:
           message = client.recv(1024)
-          broadcast(message)
+          decodedMessage = message.decode()
+          myList = decodedMessage.split(" ")
+          print(myList[1])
+
+          #Were checking if this message is for the public or its a private message!
+          if(myList[1] == "PUBLIC"):
+              print("There is a public message!")
+              broadcast(message)
+
+          #If we can match the nickname with our cleints send the message to them
+          else:
+              for nickname in nickNames:
+                  if(myList[1] == nickname):
+                         print(f"There is a private message to {nickname}")
+                         index = nickNames.index(nickname)
+                         wantedClient = clients[index]
+                         wantedClient.send(message)
+
         except:
             index = clients.index(client)
             clients.remove(client)
@@ -64,3 +79,4 @@ def receive():
 
 receive()
 serverSocket.close()
+
