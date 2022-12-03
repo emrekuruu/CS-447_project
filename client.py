@@ -1,7 +1,7 @@
 from socket import *
 import threading
 
-serverName = "127.0.0.1"
+serverName = "18.204.213.121"
 port = 22001
 
 #Get a Nick name from the client
