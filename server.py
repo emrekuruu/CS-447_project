@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 host = "127.0.0.1"
-port = 22010
+port = 22011
 
 serverSocket = socket(AF_INET,SOCK_STREAM )
 serverSocket.bind((host,port))
@@ -28,6 +28,13 @@ def handle(client):
           message = client.recv(1024)
           decodedMessage = message.decode()
           myList = decodedMessage.split(" ")
+
+          if(myList[1] == "EXIT"):
+                index = clients.index(client)
+                clients.remove(client)
+                client.close()
+                broadcast(f"{nickNames[index]} has left the chat".encode())
+                nickNames.remove(nickNames[index])
 
           #Were checking if this message is for the public or its a private message!
           if(myList[1] == "PUBLIC"):
