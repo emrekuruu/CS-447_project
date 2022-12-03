@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 serverName = "127.0.0.1"
-port = 60001
+port = 22001
 
 #Get a Nick name from the client
 nickName = input("What would you like to be called: ")
@@ -21,6 +21,8 @@ def receive():
                 clientSocket.send(nickName.encode())
             else:
                print(message)
+
+
         except:
             print("Connection was not successful")
             clientSocket.close()
