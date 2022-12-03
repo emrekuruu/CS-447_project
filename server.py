@@ -2,7 +2,7 @@ from socket import *
 import threading
 
 host = "127.0.0.1"
-port = 22001
+port = 22010
 
 serverSocket = socket(AF_INET,SOCK_STREAM )
 serverSocket.bind((host,port))
@@ -28,21 +28,29 @@ def handle(client):
           message = client.recv(1024)
           decodedMessage = message.decode()
           myList = decodedMessage.split(" ")
-          print(myList[1])
 
           #Were checking if this message is for the public or its a private message!
           if(myList[1] == "PUBLIC"):
+              myList.remove("PUBLIC")
+              message = ""
+              for i in myList:
+                  message += f"{i} "
+
               print("There is a public message!")
-              broadcast(message)
+              broadcast(message.encode())
 
           #If we can match the nickname with our cleints send the message to them
           else:
               for nickname in nickNames:
                   if(myList[1] == nickname):
-                         print(f"There is a private message to {nickname}")
-                         index = nickNames.index(nickname)
-                         wantedClient = clients[index]
-                         wantedClient.send(message)
+                        myList.remove(nickname)
+                        message = ""
+                        for i in myList:
+                              message += f"{i} "
+                        print(f"There is a private message to {nickname}")
+                        index = nickNames.index(nickname)
+                        wantedClient = clients[index]
+                        wantedClient.send(message.encode())
 
         except:
             index = clients.index(client)
