@@ -1,8 +1,13 @@
 from socket import *
 import threading
+import rsa
+
 
 host = "127.0.0.1"
-port = 22047
+port = 22054
+
+public_key,private_key = rsa.newkeys(1024)
+
 
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind((host, port))
@@ -24,18 +29,21 @@ nickNames.append("admin")
 # Banned accounts
 banned = []
 
+# Public keys of the clients
+p_key = dict()
+
 
 # for sending a message to each client
 def broadcast(message):
     for client in clients:
-        client.send(message)
+        client.send(rsa.encrypt(message,p_key[client]))
 
 
 # business logic for one client (later this method will run for all clients)
 def handle(client):
     while True:
         try:
-            message = client.recv(1024)
+            message = rsa.decrypt(client.recv(1024),private_key)
             decodedMessage = message.decode()
             myList = decodedMessage.split(" ")
             print(myList)
@@ -61,7 +69,7 @@ def handle(client):
                                 for x in nickNames:
                                     if(x != "admin"):
                                             result += f"{x} "
-                                    WantedClient.send(result.encode())
+                                    WantedClient.send(rsa.encrypt(result.encode(),p_key[WantedClient]))
                                     result = ""
 
 
@@ -93,7 +101,7 @@ def handle(client):
                         print(f"There is a private message to {nickname}")
                         for WantedClient in client_dick.keys():
                             if client_dick[WantedClient] == nickname:
-                                WantedClient.send(message.encode())
+                                WantedClient.send(rsa.encrypt(message.encode(),p_key[WantedClient]))
 
         except:
             clients.remove(client)
@@ -110,18 +118,21 @@ def receive():
         clientSocket, address = serverSocket.accept()
         print(f"Connected from {address}")
 
-        # Sign in or Log in?
-        clientSocket.send("SIGN".encode())
-        first_time = clientSocket.recv(1024).decode()
+        clientSocket.send(public_key.save_pkcs1("PEM"))
+        p_key[clientSocket] = rsa.PublicKey.load_pkcs1(clientSocket.recv(1024))
 
-        if (first_time == "SIGN IN"):
+        # Sign in or Log in?
+        clientSocket.send(rsa.encrypt("SIGN".encode(),p_key[clientSocket]))
+        first_time = rsa.decrypt(clientSocket.recv(1024),private_key).decode()
+
+        if (first_time == "CREATE ACCOUNT"):
             # ask them for a username than add them to our lists
-            clientSocket.send("NICK".encode())
-            nickname = clientSocket.recv(1024).decode()
+            clientSocket.send(rsa.encrypt("NICK".encode(),p_key[clientSocket]))
+            nickname = rsa.decrypt(clientSocket.recv(1024),private_key).decode()
             # Used nickname
             nickname_alredy_used = True
             if (nickNames.__contains__(nickname)):
-                clientSocket.send("REFUSED".encode())
+                clientSocket.send(rsa.encrypt("REFUSED".encode(),p_key[clientSocket]))
                 continue
             else:
                 nickname_alredy_used = False
@@ -130,26 +141,26 @@ def receive():
             client_dick[clientSocket] = nickname
 
             # ask them to pick a password
-            clientSocket.send("PASSWORD".encode())
-            password = clientSocket.recv(1024).decode()
+            clientSocket.send(rsa.encrypt("PASSWORD".encode(),p_key[clientSocket]))
+            password = rsa.decrypt(clientSocket.recv(1024),private_key).decode()
             passwords[nickname] = password
 
         else:
             # ask them their nickname to verify
-            clientSocket.send("NICK".encode())
-            nickname = clientSocket.recv(1024).decode()
+            clientSocket.send(rsa.encrypt("NICK".encode(),p_key[clientSocket]))
+            nickname = rsa.decrypt(clientSocket.recv(1024),private_key).decode()
             if ((nickNames.__contains__(nickname)) and nickname not in banned):
                 # Get password to verify nickname
-                clientSocket.send("PASSWORD".encode())
-                password = clientSocket.recv(1024).decode()
+                clientSocket.send(rsa.encrypt("PASSWORD".encode(),p_key[clientSocket]))
+                password = rsa.decrypt(clientSocket.recv(1024),private_key).decode()
                 if (passwords[nickname] != password):
-                    clientSocket.send("REFUSED".encode())
+                    clientSocket.send(rsa.encrypt("REFUSED".encode(),p_key[clientSocket]))
                     clientSocket.close()
                     continue
                 else:
                     clients.append(clientSocket)
             else:
-                clientSocket.send("REFUSED".encode())
+                clientSocket.send(rsa.encrypt("REFUSED".encode(),p_key[clientSocket]))
                 clientSocket.close()
                 continue
 
