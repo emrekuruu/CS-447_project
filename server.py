@@ -4,7 +4,7 @@ import rsa
 
 
 host = "127.0.0.1"
-port = 22054
+port = 22062
 
 public_key,private_key = rsa.newkeys(1024)
 
@@ -60,20 +60,6 @@ def handle(client):
 
                 broadcast(f"{nickNameToBeBanned} is now banned".encode())
 
-            elif(myList[0] == "ONLINE"):
-                print("Someone asked for user list")
-                to = myList[1]
-                for WantedClient in client_dick.keys():
-                            if client_dick[WantedClient] == to:
-                                result = ""
-                                for x in nickNames:
-                                    if(x != "admin"):
-                                            result += f"{x} "
-                                    WantedClient.send(rsa.encrypt(result.encode(),p_key[WantedClient]))
-                                    result = ""
-
-
-
 
             elif (myList[1] == "EXIT"):
                 clients.remove(client)
@@ -100,6 +86,7 @@ def handle(client):
                             message += f"{i} "
                         print(f"There is a private message to {nickname}")
                         for WantedClient in client_dick.keys():
+                            print(client_dick[WantedClient])
                             if client_dick[WantedClient] == nickname:
                                 WantedClient.send(rsa.encrypt(message.encode(),p_key[WantedClient]))
 
@@ -134,6 +121,7 @@ def receive():
             if (nickNames.__contains__(nickname)):
                 clientSocket.send(rsa.encrypt("REFUSED".encode(),p_key[clientSocket]))
                 continue
+
             else:
                 nickname_alredy_used = False
             nickNames.append(nickname)
@@ -165,6 +153,11 @@ def receive():
                 continue
 
         print(f"Nickname of the client is {nickname}")
+        broadcast("NEW".encode())
+        temp = ""
+        for g in nickNames:
+            temp += f"{g} "
+        broadcast(temp.encode())
 
         # We will have a new thread for each client we want to handle each connection separately !!!
         thread = threading.Thread(target=handle, args=(clientSocket,))
