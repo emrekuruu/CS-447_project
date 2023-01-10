@@ -1,12 +1,16 @@
+
+
 from socket import *
 import threading
 import tkinter
 from tkinter import simpledialog
 import tkinter.scrolledtext
+import rsa
+
 
 serverName = "127.0.0.1"
-port = 22047
-
+port = 22054
+public_key,private_key = rsa.newkeys(1024)
 
 class Client:
 
@@ -15,13 +19,16 @@ class Client:
         self.clientSocket = socket(AF_INET, SOCK_STREAM)
         self.clientSocket.connect((host, port))
         self.message = ""
+        self.server_key = rsa.PublicKey.load_pkcs1(self.clientSocket.recv(1024))
+        self.clientSocket.send(public_key.save_pkcs1("PEM"))
+
 
         msg = tkinter.Tk()
         msg.withdraw()
 
         self.gui_done = False
 
-        self.SignIn = simpledialog.askstring(("User Name"), "SIGN IN", parent=msg)
+        self.SignIn = simpledialog.askstring(("User Name"), "CREATE ACCOUNT OR LOG IN", parent=msg)
         self.nickName = simpledialog.askstring("Nickname", "Please choose a nickname", parent=msg)
 
         # Will they sign in log in
@@ -51,6 +58,11 @@ class Client:
         # The area where the messages are displayed
         self.text_area = tkinter.scrolledtext.ScrolledText(self.win)
         self.text_area.pack(padx=20, pady=5)
+        self.text_area.config(state="normal")
+        self.text_area.insert("end","Welcome to our online Chat Room")
+        self.text_area.yview("end")
+        self.text_area.insert("end","\n")
+        self.text_area.yview("end")
         self.text_area.config(state="disabled")
 
         # Another label
@@ -82,20 +94,20 @@ class Client:
     def receive(self):
         while self.running:
             try:
-                message = self.clientSocket.recv(1024).decode()
+                message = rsa.decrypt(self.clientSocket.recv(1024),private_key).decode()
                 print(message)
                 print(self.gui_done)
 
                 # This is the sign in message
                 if message == "SIGN":
-                    self.clientSocket.send(self.SignIn.encode())
+                    self.clientSocket.send(rsa.encrypt(self.SignIn.encode(),self.server_key))
 
                 # if the message is NICK this means server wants us to send it our nickname( this is the initial connection )
                 elif message == "NICK":
-                    self.clientSocket.send(self.nickName.encode())
+                    self.clientSocket.send(rsa.encrypt(self.nickName.encode(),self.server_key))
 
                 elif message == "PASSWORD":
-                    self.clientSocket.send(self.password.encode())
+                    self.clientSocket.send(rsa.encrypt(self.password.encode(),self.server_key))
 
                 elif message == "REFUSED":
                     print(
@@ -105,10 +117,12 @@ class Client:
 
                 if self.gui_done:
                     self.text_area.config(state="normal")
-                    self.text_area.insert("end"," ")
-                    self.text_area.yview("end+2l")
-                    self.text_area.insert("end-1c", message)
-                    self.text_area.yview("end+2l")
+                    self.text_area.insert("end","\n")
+                    self.text_area.yview("end")
+                    self.text_area.insert("end","")
+                    self.text_area.yview("end")
+                    self.text_area.insert("end", message)
+                    self.text_area.yview("end")
                     self.text_area.config(state="disabled")
             except:
                 print("Connection Failed")
@@ -121,11 +135,11 @@ class Client:
             #This is for banning clients
         if self.message[len(self.nickName)+2:].startswith("/"):
             if self.nickName == "admin":
-                self.clientSocket.send(self.message[len(self.nickName)+2:].encode())
+                self.clientSocket.send(rsa.encrypt(self.message[len(self.nickName)+2:].encode(),self.server_key))
             else:
                 print("Only Admins can execute commands")
 
-        self.clientSocket.send(self.message.encode())
+        self.clientSocket.send(rsa.encrypt(self.message.encode(),self.server_key))
 
         if( self.message[len(self.nickName)+2:] == "EXIT"):
             self.stop()
@@ -135,10 +149,7 @@ class Client:
         self.message += "PUBLIC "
 
     def online(self):
-        self.clientSocket.send(f"ONLINE {self.nickName}".encode())
+        self.clientSocket.send(rsa.encrypt(f"ONLINE {self.nickName}".encode(),self.server_key))
 
 
 client = Client(serverName, port)
-
-
-
