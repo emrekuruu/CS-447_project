@@ -7,7 +7,7 @@ import rsa
 
 
 serverName = "54.172.32.142"
-port = 22069
+port = 22071
 public_key,private_key = rsa.newkeys(1024)
 
 class Client:
@@ -39,6 +39,7 @@ class Client:
         self.r_thread.start()
 
     def stop(self):
+        self.clientSocket.send(rsa.encrypt("EXIT".encode(),self.server_key))
         self.win.destroy()
         self.running = False
         self.clientSocket.close()
@@ -108,6 +109,7 @@ class Client:
                 if message == "NEW":
                     online = rsa.decrypt(self.clientSocket.recv(1024),private_key).decode()
                     self.online_area.config(state="normal")
+                    self.online_area.delete("1.0","end")
                     self.online_area.insert("end","\n")
                     self.online_area.yview("end")
                     self.online_area.insert("end","")
