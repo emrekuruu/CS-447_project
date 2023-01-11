@@ -61,7 +61,7 @@ def handle(client):
 
                 broadcast(f"{nickNameToBeBanned} is now banned".encode())
 
-           elif (myList[0] == "EXIT"):
+            elif (myList[0] == "EXIT"):
                 imp = client_dick[client]
                 clients.remove(client)
                 client.close()
