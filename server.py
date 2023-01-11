@@ -2,9 +2,9 @@ from socket import *
 import threading
 import rsa
 
-
 host = "127.0.0.1"
-port = 22062
+port = 22064
+
 
 public_key,private_key = rsa.newkeys(1024)
 
@@ -51,10 +51,11 @@ def handle(client):
             if (myList[0] == "/ban"):
                 print("An account is Banned")
                 nickNameToBeBanned = myList[1]
+                print(nickNameToBeBanned)
                 banned.append(nickNameToBeBanned)
                 for client_ in client_dick.keys():
                     if client_dick[client_] == nickNameToBeBanned:
-                        client_.send("REFUSED".encode())
+                        client_.send(rsa.encrypt("REFUSED".encode(),p_key[client_]))
                         client_.close()
                         clients.remove(client_)
 
