@@ -8,11 +8,11 @@ import rsa
 
 serverName = "54.172.32.142"
 port = 15010
-
+public_key,private_key = rsa.newkeys(1024)
+    
 class Client:
     def __init__(self, host, port):
         # Connection syntax
-        public_key,private_key = rsa.newkeys(1024)
         self.clientSocket = socket(AF_INET, SOCK_STREAM)
         self.clientSocket.connect((host, port))
         self.message = ""
