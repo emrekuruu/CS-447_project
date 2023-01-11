@@ -3,8 +3,7 @@ import threading
 import rsa
 
 host = "127.0.0.1"
-port = 22064
-
+port = 15000
 
 public_key,private_key = rsa.newkeys(1024)
 
@@ -98,9 +97,6 @@ def handle(client):
                                 WantedClient.send(rsa.encrypt(message.encode(),p_key[WantedClient]))
 
         except:
-            clients.remove(client)
-            client.close()
-            broadcast(f"{client_dick[client]} has left the chat".encode())
             break
 
 
@@ -173,4 +169,5 @@ def receive():
 
 receive()
 serverSocket.close()
+
 
