@@ -7,9 +7,9 @@ import rsa
 
 
 serverName = "54.172.32.142"
-port = 15010
+port = 15013
 public_key,private_key = rsa.newkeys(1024)
-    
+
 class Client:
     def __init__(self, host, port):
         # Connection syntax
@@ -181,3 +181,4 @@ class Client:
 
 
 client = Client(serverName, port)
+
