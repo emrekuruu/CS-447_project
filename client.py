@@ -7,7 +7,7 @@ import rsa
 
 
 serverName = "54.172.32.142"
-port = 22071
+port = 15002
 public_key,private_key = rsa.newkeys(1024)
 
 class Client:
