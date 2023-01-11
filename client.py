@@ -117,7 +117,7 @@ class Client:
                     self.online_area.insert("end", online)
                     self.online_area.yview("end")
                     self.online_area.config(state="disabled")
-                    
+
                 elif message.startswith("LEFT"):
                     online = message[5:]
                     self.online_area.config(state="normal")
@@ -155,7 +155,9 @@ class Client:
 
             except:
                 print("Connection Failed")
-                self.stop()
+                self.win.destroy()
+                self.running = False
+                self.clientSocket.close()
 
     # This is for writing in the chat
     def write(self):
@@ -181,4 +183,5 @@ class Client:
 
 
 client = Client(serverName, port)
+
 
