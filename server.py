@@ -25,6 +25,8 @@ passwords["admin"] = "admin123"
 nickNames = []
 nickNames.append("admin")
 
+online = []
+
 # Banned accounts
 banned = []
 
@@ -52,6 +54,7 @@ def handle(client):
                 nickNameToBeBanned = myList[1]
                 print(nickNameToBeBanned)
                 banned.append(nickNameToBeBanned)
+                online.remove(nickNameToBeBanned)
                 for client_ in client_dick.keys():
                     if client_dick[client_] == nickNameToBeBanned:
                         client_.send(rsa.encrypt("REFUSED".encode(),p_key[client_]))
@@ -63,11 +66,11 @@ def handle(client):
             elif (myList[0] == "EXIT"):
                 imp = client_dick[client]
                 clients.remove(client)
+                online.remove(client_dick[client])
                 client.close()
                 temp = "LEFT "
-                for g in nickNames:
-                    if g != imp:
-                        temp += f"{g} "
+                for g in online:
+                    temp += f"{g} "
                 broadcast(temp.encode())
 
                 broadcast(f"{client_dick[client]} has left the chat".encode())
@@ -128,6 +131,7 @@ def receive():
             else:
                 nickname_alredy_used = False
             nickNames.append(nickname)
+            online.append(nickname)
             clients.append(clientSocket)
             client_dick[clientSocket] = nickname
 
@@ -149,6 +153,7 @@ def receive():
                     clientSocket.close()
                     continue
                 else:
+                    online.append(nickname)
                     clients.append(clientSocket)
             else:
                 clientSocket.send(rsa.encrypt("REFUSED".encode(),p_key[clientSocket]))
@@ -158,7 +163,7 @@ def receive():
         print(f"Nickname of the client is {nickname}")
         broadcast("NEW".encode())
         temp = ""
-        for g in nickNames:
+        for g in online:
             temp += f"{g} "
         broadcast(temp.encode())
 
@@ -169,5 +174,6 @@ def receive():
 
 receive()
 serverSocket.close()
+
 
 
