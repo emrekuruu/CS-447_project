@@ -7,18 +7,17 @@ import rsa
 
 
 serverName = "54.172.32.142"
-port = 15005
-public_key,private_key = rsa.newkeys(1024)
+port = 15010
 
 class Client:
     def __init__(self, host, port):
         # Connection syntax
+        public_key,private_key = rsa.newkeys(1024)
         self.clientSocket = socket(AF_INET, SOCK_STREAM)
         self.clientSocket.connect((host, port))
         self.message = ""
         self.server_key = rsa.PublicKey.load_pkcs1(self.clientSocket.recv(1024))
         self.clientSocket.send(public_key.save_pkcs1("PEM"))
-
 
         msg = tkinter.Tk()
 
@@ -48,7 +47,7 @@ class Client:
         # Window itself
         self.win = tkinter.Tk()
         self.win.configure(bg="lightgray")
-
+        self.win.title("Chat Room")
         # a small label
         self.chat_label = tkinter.Label(self.win, text="Chat: ", bg="lightgray")
         self.chat_label.config(font=("Arial", 12))
@@ -182,4 +181,3 @@ class Client:
 
 
 client = Client(serverName, port)
-
