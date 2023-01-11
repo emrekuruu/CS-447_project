@@ -6,8 +6,8 @@ import tkinter.scrolledtext
 import rsa
 
 
-serverName = "127.0.0.1"
-port = 22062
+serverName = "54.172.32.142"
+port = 22069
 public_key,private_key = rsa.newkeys(1024)
 
 class Client:
@@ -167,3 +167,4 @@ class Client:
 
 
 client = Client(serverName, port)
+
