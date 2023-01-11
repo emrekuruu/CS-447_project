@@ -7,7 +7,7 @@ import rsa
 
 
 serverName = "54.172.32.142"
-port = 15002
+port = 15005
 public_key,private_key = rsa.newkeys(1024)
 
 class Client:
@@ -155,7 +155,6 @@ class Client:
 
             except:
                 print("Connection Failed")
-                self.win.destroy()
                 self.running = False
                 self.clientSocket.close()
 
@@ -183,5 +182,4 @@ class Client:
 
 
 client = Client(serverName, port)
-
 
