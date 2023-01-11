@@ -117,6 +117,18 @@ class Client:
                     self.online_area.insert("end", online)
                     self.online_area.yview("end")
                     self.online_area.config(state="disabled")
+                    
+                elif message.startswith("LEFT"):
+                    online = message[5:]
+                    self.online_area.config(state="normal")
+                    self.online_area.delete("1.0","end")
+                    self.online_area.insert("end","\n")
+                    self.online_area.yview("end")
+                    self.online_area.insert("end","")
+                    self.online_area.yview("end")
+                    self.online_area.insert("end", online)
+                    self.online_area.yview("end")
+                    self.online_area.config(state="disabled")
 
                 # if the message is NICK this means server wants us to send it our nickname( this is the initial connection )
                 elif message == "NICK":
