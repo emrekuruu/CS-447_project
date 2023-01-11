@@ -61,10 +61,16 @@ def handle(client):
 
                 broadcast(f"{nickNameToBeBanned} is now banned".encode())
 
-
-            elif (myList[1] == "EXIT"):
+           elif (myList[0] == "EXIT"):
+                imp = client_dick[client]
                 clients.remove(client)
                 client.close()
+                temp = "LEFT "
+                for g in nickNames:
+                    if g != imp:
+                        temp += f"{g} "
+                broadcast(temp.encode())
+
                 broadcast(f"{client_dick[client]} has left the chat".encode())
 
             # Were checking if this message is for the public or its a private message!
